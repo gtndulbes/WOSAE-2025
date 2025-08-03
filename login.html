@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Panitia</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+   body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    transition: background-color 0.3s ease;
+  }
+  .login-container {
+    background-color: white;
+    padding: 30px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 360px;
+    position: relative;
+    animation: fadeIn 0.6s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .login-container h2 {
+    text-align: center;
+    color: #1B5E20;
+    margin-bottom: 20px;
+  }
+  .form-group {
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: bold;
+  }
+  .form-group input[type="text"],
+  .form-group input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus {
+    border-color: #1B5E20;
+    outline: none;
+  }
+  .form-group .eye-icon {
+    position: absolute;
+    right: 10px;
+    top: 38px;
+    cursor: pointer;
+    font-size: 14px;
+    color: gray;
+  }
+  .remember {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .remember input {
+    margin-right: 6px;
+  }
+  .error-msg {
+    color: red;
+    font-size: 13px;
+    margin-bottom: 10px;
+    display: none;
+  }
+  .login-btn {
+    background-color: #1B5E20;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  .login-btn:hover {
+    background-color: #145317;
+  }
+</style>
+</head>
+<body>
+ <div class="login-container">
+  <h2>Login Panitia WOSAE</h2>
+  <div id="error" class="error-msg"></div>
+  <div class="form-group">
+    <label for="username">Username</label>
+    <input type="text" id="username" placeholder="Masukkan username">
+  </div>
+  <div class="form-group">
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Masukkan password">
+    <span class="eye-icon" onclick="togglePassword()">👁️</span>
+  </div>
+  <div class="remember">
+    <input type="checkbox" id="remember"> <label for="remember">Ingat saya</label>
+  </div>
+  <button class="login-btn" onclick="submitLogin()">Login</button>
+</div>
+
+<script>
+  // Prefill username jika disimpan sebelumnya
+  window.addEventListener('DOMContentLoaded', () => {
+    const savedUser = localStorage.getItem("savedUsername");
+    const savedRemember = localStorage.getItem("remember");
+    if (savedUser && savedRemember === 'true') {
+      document.getElementById("username").value = savedUser;
+      document.getElementById("remember").checked = true;
+    }
+  });
+
+  function togglePassword() {
+    const passInput = document.getElementById("password");
+    passInput.type = passInput.type === "password" ? "text" : "password";
+  }
+
+  function submitLogin() {
+    const user = document.getElementById("username").value.trim();
+    const pass = document.getElementById("password").value;
+    const errorBox = document.getElementById("error");
+
+    if (!user || !pass) {
+      errorBox.innerText = "Harap isi semua kolom.";
+      errorBox.style.display = "block";
+      return;
+    }
+
+    if (pass.length < 6) {
+      errorBox.innerText = "Password minimal 6 karakter.";
+      errorBox.style.display = "block";
+      return;
+    }
+
+    if (user === "admin" && pass === "admin123") {
+      const rememberMe = document.getElementById("remember").checked;
+      localStorage.setItem("remember", rememberMe);
+      if (rememberMe) {
+        localStorage.setItem("savedUsername", user);
+      } else {
+        localStorage.removeItem("savedUsername");
+      }
+      window.location.href = "dashboard.html";
+    } else {
+      errorBox.innerText = "Username atau Password salah!";
+      errorBox.style.display = "block";
+    }
+  }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,41 @@
+<nav class="topbar">
+  <div class="topbar-left">
+    <img src="img/igg.png" alt="">
+    <div class="topbar-title">WOSAE - Dashboard</div>
+  </div>
+  <div class="topbar-toggle" onclick="toggleNav()">☰</div>
+  <div class="topbar-links" id="topbarLinks">
+    <a href="dashboard.html" class="nav-item">Beranda</a>
+    <div class="dropdown">
+      <a href="#">Divisi ▼</a>
+      <div class="dropdown-content">
+        <a href="divisi.html">Semua Divisi</a>
+        <a href="divisi-dekorasi.html">Dekorasi</a>
+        <a href="divisi-acara.html">Acara</a>
+        <a href="divisi-perkap.html">Perkap</a>
+        <a href="divisi-konsumsi.html">Konsumsi</a>
+      </div>
+    </div>
+    <a href="data-santri.html" class="nav-item">Data Santri</a>
+    <a href="brosur.html" class="nav-item">Brosur</a>
+    <a href="log.html" class="nav-item">Log</a>
+    <a href="logout.html" class="logout">Logout</a>
+  </div>
+</nav>
+<script>
+  function toggleNav() {
+    document.getElementById('topbarLinks').classList.toggle('show');
+  }
+
+  // Highlight link aktif
+  const links = document.querySelectorAll(".nav-item");
+  links.forEach(link => {
+    if (link.href === window.location.href) {
+      link.classList.add("active");
+    }
+  });
+
+  // Dark mode toggle contoh: tambahkan tombol jika ingin
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (prefersDark) document.body.classList.add('dark');
+</script>

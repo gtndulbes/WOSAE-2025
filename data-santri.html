@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Santri</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+   <nav class="topbar">
+  <div class="topbar-left">
+    <img src="img/igg.png" alt="">
+    <div class="topbar-title">WOSAE - Dashboard</div>
+  </div>
+  <div class="topbar-toggle" onclick="toggleNav()">☰</div>
+  <div class="topbar-links" id="topbarLinks">
+    <a href="dashboard.html" class="nav-item">Beranda</a>
+    <div class="dropdown">
+      <a href="#">Divisi ▼</a>
+      <div class="dropdown-content">
+        <a href="divisi.html">Semua Divisi</a>
+        <a href="divisi-dekorasi.html">Dekorasi</a>
+        <a href="divisi-acara.html">Acara</a>
+        <a href="divisi-perkap.html">Perkap</a>
+        <a href="divisi-konsumsi.html">Konsumsi</a>
+      </div>
+    </div>
+    <a href="data-santri.html" class="nav-item">Data Santri</a>
+    <a href="brosur.html" class="nav-item">Brosur</a>
+    <a href="log.html" class="nav-item">Log</a>
+    <a href="logout.html" class="logout">Logout</a>
+  </div>
+</nav>
+<script>
+  function toggleNav() {
+    document.getElementById('topbarLinks').classList.toggle('show');
+  }
+
+  // Highlight link aktif
+  const links = document.querySelectorAll(".nav-item");
+  links.forEach(link => {
+    if (link.href === window.location.href) {
+      link.classList.add("active");
+    }
+  });
+
+  // Dark mode toggle contoh: tambahkan tombol jika ingin
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (prefersDark) document.body.classList.add('dark');
+</script>
+  <nav class="main-nav">
+    <a href="dashboard.html" class="back-btn">⬅ Kembali</a>
+  </nav>
+  <h2>Data Santri</h2>
+
+  <section class="form-container">
+    <h3>Tambah Santri Baru</h3>
+    <form id="formSantri">
+      <input type="text" id="nama" placeholder="Nama Lengkap" required>
+      <input type="text" id="asal" placeholder="Asal Daerah" required>
+      <input type="text" id="hp" placeholder="No. HP" required>
+      <select id="status">
+        <option value="Lunas">Lunas</option>
+        <option value="Belum">Belum</option>
+      </select>
+      <button type="submit">Tambahkan</button>
+    </form>
+  </section>
+
+  <table id="tabelSantri">
+    <thead>
+      <tr>
+        <th>Nama</th>
+        <th>Asal</th>
+        <th>No. HP</th>
+        <th>Status Pembayaran</th>
+        <th>Update</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Ahmad Fauzi</td>
+        <td>Banyumas</td>
+        <td>08123456789</td>
+        <td><span class="status paid">Lunas</span></td>
+        <td><button onclick="toggle(this)">Ubah</button></td>
+      </tr>
+      <tr>
+        <td>Siti Maemunah</td>
+        <td>Cilacap</td>
+        <td>08234567890</td>
+        <td><span class="status unpaid">Belum</span></td>
+        <td><button onclick="toggle(this)">Ubah</button></td>
+      </tr>
+    </tbody>
+  </table>
+<div style="display: flex; justify-content: flex-end; padding: 10px; background: #e8f5e9;">
+  <a href="logout.html" style="text-decoration: none; background: #d32f2f; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold;">Logout</a>
+</div>
+  <script>
+    function toggle(button) {
+      const cell = button.parentElement.previousElementSibling;
+      if (cell.textContent.includes("Lunas")) {
+        cell.innerHTML = '<span class="status unpaid">Belum</span>';
+      } else {
+        cell.innerHTML = '<span class="status paid">Lunas</span>';
+      }
+    }
+
+    document.getElementById("formSantri").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const nama = document.getElementById("nama").value;
+      const asal = document.getElementById("asal").value;
+      const hp = document.getElementById("hp").value;
+      const status = document.getElementById("status").value;
+
+      const tbody = document.querySelector("#tabelSantri tbody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${nama}</td>
+        <td>${asal}</td>
+        <td>${hp}</td>
+        <td><span class="status ${status === 'Lunas' ? 'paid' : 'unpaid'}">${status}</span></td>
+        <td><button onclick="toggle(this)">Ubah</button></td>
+      `;
+      tbody.appendChild(row);
+
+      // Reset form
+      document.getElementById("formSantri").reset();
+    });
+  </script>
+</body>
+</html>
