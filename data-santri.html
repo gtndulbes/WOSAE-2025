@@ -88,12 +88,19 @@
     const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
     localStorage.setItem('theme', newTheme);
   }
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzI4DbyB8qZ4qncV8lw22EHfFOD5lkJ2U5mW4rnDZTeQtoa2VddzkJNl7u8Q8fpiF-Y/exec";
     const form = document.getElementById("formSantri");
     const tabelSantri = document.getElementById("tabelSantri");
     const searchInput = document.getElementById("searchInput");
     const exportBtn = document.getElementById("exportBtn");
+    let santriList = [];
 
-    let santriList = JSON.parse(localStorage.getItem("santriList")) || [];
+    async function fetchSantri() {
+      const response = await fetch(`${SCRIPT_URL}?action=read`);
+      const data = await response.json();
+      santriList = data || [];
+      renderTable();
+    }
 
     function renderTable(filter = "") {
       tabelSantri.innerHTML = "";
@@ -101,16 +108,11 @@
         if (s.nama.toLowerCase().includes(filter.toLowerCase())) {
           const row = `
             <tr>
-              <td contenteditable="true" onblur="editField(${i}, 'nama', this.innerText)">${s.nama}</td>
-              <td contenteditable="true" onblur="editField(${i}, 'asal', this.innerText)">${s.asal}</td>
-              <td contenteditable="true" onblur="editField(${i}, 'alamat', this.innerText)">${s.alamat}</td>
-              <td contenteditable="true" onblur="editField(${i}, 'hp', this.innerText)">${s.hp}</td>
-              <td>
-                <select onchange="updateStatus(${i}, this.value)">
-                  <option value="Belum Lunas" ${s.status === "Belum Lunas" ? "selected" : ""}>Belum Lunas</option>
-                  <option value="Lunas" ${s.status === "Lunas" ? "selected" : ""}>Lunas</option>
-                </select>
-              </td>
+              <td>${s.nama}</td>
+              <td>${s.asal}</td>
+              <td>${s.alamat}</td>
+              <td>${s.hp}</td>
+              <td>${s.status}</td>
               <td class="actions">
                 <button onclick="hapusSantri(${i})">Hapus</button>
               </td>
@@ -121,27 +123,12 @@
       });
     }
 
-    function hapusSantri(index) {
+    async function hapusSantri(index) {
       santriList.splice(index, 1);
-      simpanData();
-    }
-
-    function updateStatus(index, newStatus) {
-      santriList[index].status = newStatus;
-      simpanData();
-    }
-
-    function editField(index, field, value) {
-      santriList[index][field] = value;
-      simpanData();
-    }
-
-    function simpanData() {
-      localStorage.setItem("santriList", JSON.stringify(santriList));
       renderTable(searchInput.value);
     }
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const santri = {
         nama: document.getElementById("nama").value,
@@ -150,9 +137,15 @@
         hp: document.getElementById("hp").value,
         status: document.getElementById("status").value
       };
-      santriList.push(santri);
-      simpanData();
+
+      await fetch(`${SCRIPT_URL}?action=create`, {
+        method: "POST",
+        body: JSON.stringify(santri),
+        headers: { "Content-Type": "application/json" }
+      });
+
       form.reset();
+      fetchSantri();
     });
 
     searchInput.addEventListener("input", () => {
@@ -180,22 +173,7 @@
       });
     });
 
-      let csvRows = [];
-      for (let i = 0; i < headers.length; i++) {
-        let row = [headers[i], ...columns[i]].join(",");
-        csvRows.push(row);
-      }
-
-      const csvContent = csvRows.join("\n");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      link.setAttribute("href", URL.createObjectURL(blob));
-      link.setAttribute("download", "data-santri.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-    renderTable();
+    fetchSantri();
   </script>
 </body>
 </html>
