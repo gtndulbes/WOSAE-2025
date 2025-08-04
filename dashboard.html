@@ -5,6 +5,118 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard Panitia</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f3f3f3;
+      margin: 0;
+    }
+    .topbar {
+      background-color: #1B5E20;
+      color: white;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+    }
+    .topbar-left {
+      display: flex;
+      align-items: center;
+    }
+    .topbar-left img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    .topbar-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .topbar-toggle {
+      display: none;
+      font-size: 22px;
+      cursor: pointer;
+    }
+    .topbar-links {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .topbar-links a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .topbar-links a.logout {
+      background-color: #c62828;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+    .topbar-links a.logout:hover {
+      background-color: #b71c1c;
+    }
+    .dark-mode-toggle {
+      background: #2E7D32;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .dropdown {
+      position: relative;
+    }
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 160px;
+      z-index: 1;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .dropdown-content a {
+      color: #333;
+      padding: 10px;
+      display: block;
+      text-decoration: none;
+    }
+    .dropdown-content a:hover {
+      background-color: #eee;
+    }
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+    main {
+      padding: 20px;
+    }
+    .dark {
+      background-color: #121212;
+      color: white;
+    }
+    .dark .topbar {
+      background-color: #2E7D32;
+    }
+    .dark .topbar-links a,
+    .dark .dropdown-content a {
+      color: white;
+    }
+    @media screen and (max-width: 768px) {
+      .topbar-links {
+        flex-direction: column;
+        display: none;
+        width: 100%;
+        background-color: #1B5E20;
+        padding: 10px 0;
+      }
+      .topbar-links.show {
+        display: flex;
+      }
+      .topbar-toggle {
+        display: block;
+      }
+    }
+  </style>
 </head>
 <body>
 <nav class="topbar">
@@ -28,16 +140,21 @@
     <a href="data-santri.html" class="nav-item">Data Santri</a>
     <a href="brosur.html" class="nav-item">Brosur</a>
     <a href="log.html" class="nav-item">Log</a>
-    <a href="logout.html" class="logout">Logout</a>
+    <a href="index.html" class="logout" onclick="logout()">Logout</a>
     <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌓 Mode</button>
   </div>
 </nav>
+
+<main>
+  <h2>Selamat datang, <span id="panitia-nama">Panitia</span>!</h2>
+  <p>Silakan pilih menu di atas untuk mulai bekerja.</p>
+</main>
+
 <script>
   function toggleNav() {
     document.getElementById('topbarLinks').classList.toggle('show');
   }
 
-  // Highlight link aktif
   const links = document.querySelectorAll(".nav-item");
   links.forEach(link => {
     if (link.href === window.location.href) {
@@ -45,20 +162,23 @@
     }
   });
 
-  // Inisialisasi preferensi tema
   const savedTheme = localStorage.getItem('theme');
   if (savedTheme === 'dark') document.body.classList.add('dark');
 
-  // Toggle mode gelap
   function toggleDarkMode() {
     document.body.classList.toggle('dark');
     const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
     localStorage.setItem('theme', newTheme);
   }
+
+  // Tampilkan nama panitia dari localStorage
+  const nama = localStorage.getItem("savedUsername") || "Panitia";
+  document.getElementById("panitia-nama").innerText = nama;
+
+  function logout() {
+    localStorage.removeItem("savedUsername");
+    localStorage.removeItem("remember");
+  }
 </script>
-  <main>
-    <h2>Selamat datang, Panitia!</h2>
-    <p>Silakan pilih menu di atas untuk mulai bekerja.</p>
-  </main>
 </body>
 </html>

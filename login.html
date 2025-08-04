@@ -6,7 +6,8 @@
   <title>Login Panitia</title>
   <link rel="stylesheet" href="style.css">
   <style>
-   body {
+  body 
+  {
     margin: 0;
     padding: 0;
     font-family: sans-serif;
@@ -51,8 +52,9 @@
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 14px;
-    transition: border-color 0.2s;
+    font-size: 16px;
+    height: 42px;
+    box-sizing: border-box;
   }
   .form-group input:focus {
     border-color: #1B5E20;
@@ -61,7 +63,7 @@
   .form-group .eye-icon {
     position: absolute;
     right: 10px;
-    top: 38px;
+    top: 39px;
     cursor: pointer;
     font-size: 14px;
     color: gray;
@@ -84,12 +86,14 @@
     background-color: #1B5E20;
     color: white;
     padding: 10px;
+    height: 42px;
     width: 100%;
     border: none;
     border-radius: 5px;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.2s;
+    font-size: 16px;
   }
   .login-btn:hover {
     background-color: #145317;
@@ -113,6 +117,7 @@
     <input type="checkbox" id="remember"> <label for="remember">Ingat saya</label>
   </div>
   <button class="login-btn" onclick="submitLogin()">Login</button>
+  <p id="error-message" style="color:red; text-align:center; margin-top:10px;"></p>
 </div>
 
 <script>
@@ -148,20 +153,31 @@
       return;
     }
 
-    if (user === "admin" && pass === "admin123") {
-      const rememberMe = document.getElementById("remember").checked;
-      localStorage.setItem("remember", rememberMe);
-      if (rememberMe) {
-        localStorage.setItem("savedUsername", user);
-      } else {
-        localStorage.removeItem("savedUsername");
-      }
-      window.location.href = "dashboard.html";
-    } else {
-      errorBox.innerText = "Username atau Password salah!";
+    const users = [
+  { username: "admin", password: "admin123" },
+  { username: "dekorasi", password: "deko456" },
+  { username: "acara", password: "acara789" },
+  { username: "perkap", password: "perkap321" },
+  { username: "konsumsi", password: "konsumsi654" }
+];
+
+const inputUser = document.getElementById("username").value;
+const inputPass = document.getElementById("password").value;
+const remember = document.getElementById("remember").checked;
+const userr = users.find(u => u.username === inputUser && u.password === inputPass);
+
+if (userr) {
+  localStorage.setItem("savedUsername", inputUser);
+  if (remember) {
+    localStorage.setItem("remember", "true");
+  }
+  window.location.href = "dashboard.html";
+} else {
+  document.getElementById("error-message").innerText = "Username atau password salah.";
+}
+
       errorBox.style.display = "block";
     }
-  }
 </script>
 
 </body>
