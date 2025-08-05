@@ -129,27 +129,36 @@
     }
 
     form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const santri = {
-        nama: document.getElementById("nama").value,
-        asal: document.getElementById("asal").value,
-        alamat: document.getElementById("alamat").value,
-        hp: document.getElementById("hp").value,
-        status: document.getElementById("status").value
-      };
+  e.preventDefault();
 
-      await fetch(SCRIPT_URL, {
-  method: "POST",
-  body: JSON.stringify(santri),
-  headers: { "Content-Type": "application/json" }
-  })
-  .then(res => res.text())
-  .then(msg => console.log("Respon dari server:", msg))
-  .catch(err => console.error("Gagal kirim:", err));
+  const santri = {
+    nama: document.getElementById("nama").value,
+    asal: document.getElementById("asal").value,
+    alamat: document.getElementById("alamat").value,
+    hp: document.getElementById("hp").value,
+    status: document.getElementById("status").value
+  };
 
-      form.reset();
-      fetchSantri();
+  try {
+    const response = await fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify(santri),
+      headers: { "Content-Type": "application/json" }
     });
+
+    const result = await response.text();
+    console.log("Respon dari server:", result);
+
+    form.reset();
+
+    // Tambahkan jeda sebelum ambil data baru (biar Google Sheet sempat menyimpan)
+    setTimeout(fetchSantri, 1000); // 1 detik
+  } catch (error) {
+    console.error("Gagal kirim:", error);
+    alert("Gagal menambahkan santri. Coba lagi.");
+  }
+});
+
 
     searchInput.addEventListener("input", () => {
       renderTable(searchInput.value);
