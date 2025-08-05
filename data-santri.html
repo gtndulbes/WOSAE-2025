@@ -96,7 +96,7 @@
     let santriList = [];
 
     async function fetchSantri() {
-      const response = await fetch(`${SCRIPT_URL}?action=read`);
+      const response = await fetch(SCRIPT_URL);
       const data = await response.json();
       santriList = data || [];
       renderTable();
@@ -142,8 +142,10 @@
   method: "POST",
   body: JSON.stringify(santri),
   headers: { "Content-Type": "application/json" }
-});
-
+  })
+  .then(res => res.text())
+  .then(msg => console.log("Respon dari server:", msg))
+  .catch(err => console.error("Gagal kirim:", err));
 
       form.reset();
       fetchSantri();
