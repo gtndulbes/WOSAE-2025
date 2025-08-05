@@ -138,11 +138,12 @@
         status: document.getElementById("status").value
       };
 
-      await fetch(`${SCRIPT_URL}?action=create`, {
-        method: "POST",
-        body: JSON.stringify(santri),
-        headers: { "Content-Type": "application/json" }
-      });
+      await fetch(SCRIPT_URL, {
+  method: "POST",
+  body: JSON.stringify(santri),
+  headers: { "Content-Type": "application/json" }
+});
+
 
       form.reset();
       fetchSantri();
