@@ -96,7 +96,7 @@
 
   </script>
   <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
   const supabaseUrl = 'https://gmbwlgvobwclmqrqxqvd.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYndsZ3ZvYndjbG1xcnF4cXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjEwMzcsImV4cCI6MjA2OTk5NzAzN30.iXzfMXcIcyokTKbzrTpxvdfoQ7UCzoYqJ2HzxN_x6Ck';
@@ -122,6 +122,10 @@
 
   function renderTable(filter = "") {
     tabelSantri.innerHTML = "";
+    if (!santriList.length) {
+      tabelSantri.innerHTML = `<tr><td colspan="6" style="text-align:center;">Belum ada data santri.</td></tr>`;
+      return;
+    }
     santriList.forEach((s) => {
       const nama = s.nama || "";
       const asal = s.asal || "";
@@ -145,7 +149,6 @@
       }
     });
 
-    // Bind hapus
     document.querySelectorAll('.hapus-btn').forEach(btn => {
       btn.addEventListener('click', async (e) => {
         const id = e.target.getAttribute('data-id');
@@ -179,12 +182,12 @@
   });
 
   exportBtn.addEventListener("click", async () => {
+    const { utils, writeFileXLSX } = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
+
     if (!santriList.length) {
       alert("Data masih kosong atau belum dimuat.");
       return;
     }
-    console.log("DATA UNTUK EKSPOR:", santriList);
-    const { utils, writeFileXLSX } = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
 
     const headers = ["Nama", "Asal Sekolah", "Alamat", "No HP", "Status"];
     const data = santriList.map(s => [
@@ -194,9 +197,9 @@
       s.hp || "",
       s.status || ""
     ]);
-    data.unshift(headers);
 
-    const worksheet = utils.aoa_to_sheet(data);
+    const all = [headers, ...data];
+    const worksheet = utils.aoa_to_sheet(all);
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, worksheet, "Data Santri");
 
