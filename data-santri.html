@@ -91,98 +91,100 @@
    
   </script>
   <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-    const SUPABASE_URL = "https://gmbwlgvobwclmqrqxqvd.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYndsZ3ZvYndjbG1xcnF4cXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjEwMzcsImV4cCI6MjA2OTk5NzAzN30.iXzfMXcIcyokTKbzrTpxvdfoQ7UCzoYqJ2HzxN_x6Ck";
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabaseUrl = 'https://gmbwlgvobwclmqrqxqvd.supabase.co'; // GANTI DENGAN URL SUPABASE KAMU
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYndsZ3ZvYndjbG1xcnF4cXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjEwMzcsImV4cCI6MjA2OTk5NzAzN30.iXzfMXcIcyokTKbzrTpxvdfoQ7UCzoYqJ2HzxN_x6Ck'; // GANTI DENGAN ANON KEY KAMU
+  const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
-    const form = document.getElementById("formSantri");
-    const tabelSantri = document.getElementById("tabelSantri");
-    const searchInput = document.getElementById("searchInput");
-    const exportBtn = document.getElementById("exportBtn");
-    let santriList = [];
+  const form = document.getElementById("formSantri");
+  const tabelSantri = document.getElementById("tabelSantri");
+  const searchInput = document.getElementById("searchInput");
+  const exportBtn = document.getElementById("exportBtn");
 
-    async function fetchSantri() {
-      const { data, error } = await supabaseClient.from("santri").select("*");
-      if (!error) {
-        santriList = data;
-        renderTable();
-      } else {
-        console.error("Gagal ambil data:", error);
+  let santriList = [];
+
+  async function fetchSantri(filter = "") {
+    const { data, error } = await supabaseClient.from("santri").select("*");
+    if (error) {
+      console.error("Gagal ambil data:", error);
+      return;
+    }
+
+    santriList = data;
+    renderTable(filter);
+  }
+
+  function renderTable(filter = "") {
+    tabelSantri.innerHTML = "";
+    santriList.forEach((s) => {
+      if (s.nama.toLowerCase().includes(filter.toLowerCase())) {
+        const row = `
+          <tr>
+            <td>${s.nama}</td>
+            <td>${s.asal}</td>
+            <td>${s.alamat}</td>
+            <td>${s.hp}</td>
+            <td>${s.status}</td>
+            <td class="actions">
+              <button onclick="hapusSantri(${s.id})">Hapus</button>
+            </td>
+          </tr>
+        `;
+        tabelSantri.innerHTML += row;
       }
-    }
+    });
+  }
 
-    function renderTable(filter = "") {
-      tabelSantri.innerHTML = "";
-      santriList.forEach((s, i) => {
-        if (s.nama.toLowerCase().includes(filter.toLowerCase())) {
-          const row = `
-            <tr>
-              <td>${s.nama}</td>
-              <td>${s.asal}</td>
-              <td>${s.alamat}</td>
-              <td>${s.hp}</td>
-              <td>${s.status}</td>
-              <td class="actions">
-                <button onclick="hapusSantri(${s.id})">Hapus</button>
-              </td>
-            </tr>
-          `;
-          tabelSantri.innerHTML += row;
-        }
-      });
-    }
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const santri = {
+      nama: document.getElementById("nama").value,
+      asal: document.getElementById("asal").value,
+      alamat: document.getElementById("alamat").value,
+      hp: document.getElementById("hp").value,
+      status: document.getElementById("status").value
+    };
 
-    async function hapusSantri(id) {
-      await supabaseClient.from("santri").delete().eq("id", id);
+    const { error } = await supabaseClient.from("santri").insert([santri]);
+    if (error) {
+      console.error("Gagal tambah santri:", error);
+    } else {
+      form.reset();
       fetchSantri();
     }
+  });
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const santri = {
-        nama: document.getElementById("nama").value,
-        asal: document.getElementById("asal").value,
-        alamat: document.getElementById("alamat").value,
-        hp: document.getElementById("hp").value,
-        status: document.getElementById("status").value
-      };
-      const { error } = await supabaseClient.from("santri").insert([santri]);
-      if (error) {
-        console.error("Gagal tambah santri:", error);
-      } else {
-        form.reset();
-        fetchSantri();
-      }
-    });
+  searchInput.addEventListener("input", () => {
+    renderTable(searchInput.value);
+  });
 
-    searchInput.addEventListener("input", () => {
-      renderTable(searchInput.value);
-    });
+  exportBtn.addEventListener("click", async () => {
+    if (!santriList.length) {
+      alert("Data masih kosong atau belum dimuat.");
+      return;
+    }
 
-    exportBtn.addEventListener("click", () => {
-      import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs').then(XLSX => {
-        const headers = ["Nama", "Asal Sekolah", "Alamat", "No HP", "Status"];
-        const data = santriList.map(s => [s.nama, s.asal, s.alamat, s.hp, s.status]);
-        data.unshift(headers);
+    const { utils, writeFileXLSX } = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
 
-        const worksheet = XLSX.utils.aoa_to_sheet(data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Data Santri");
+    const headers = ["Nama", "Asal Sekolah", "Alamat", "No HP", "Status"];
+    const data = santriList.map(s => [s.nama, s.asal, s.alamat, s.hp, s.status]);
+    data.unshift(headers);
 
-        const wbout = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-        const blob = new Blob([wbout], { type: "application/octet-stream" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "data-santri.xlsx";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
-    });
+    const worksheet = utils.aoa_to_sheet(data);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, "Data Santri");
 
+    writeFileXLSX(workbook, "data-santri.xlsx");
+  });
+
+  fetchSantri();
+
+  // 👇 expose function globally untuk onclick="hapusSantri(id)"
+  window.hapusSantri = async function(id) {
+    await supabaseClient.from("santri").delete().eq("id", id);
     fetchSantri();
+  };
   </script>
 </body>
 </html>
