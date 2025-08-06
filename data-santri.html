@@ -88,7 +88,10 @@
     const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
     localStorage.setItem('theme', newTheme);
   }
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcPK3gz55IRtcJZuFCkmvd9n4_Cs00i9oNQy-wOeGt6VFIfBoYvAXmK0clAHkQ83_81g/exec";
+   const SUPABASE_URL = "https://gmbwlgvobwclmqrqxqvd.supabase.co"; // Ganti dengan project Supabase kamu
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYndsZ3ZvYndjbG1xcnF4cXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjEwMzcsImV4cCI6MjA2OTk5NzAzN30.iXzfMXcIcyokTKbzrTpxvdfoQ7UCzoYqJ2HzxN_x6Ck"; // Ganti dengan anon key dari Supabase
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     const form = document.getElementById("formSantri");
     const tabelSantri = document.getElementById("tabelSantri");
     const searchInput = document.getElementById("searchInput");
@@ -96,10 +99,13 @@
     let santriList = [];
 
     async function fetchSantri() {
-      const response = await fetch(SCRIPT_URL);
-      const data = await response.json();
-      santriList = data || [];
-      renderTable();
+      const { data, error } = await supabase.from("santri").select("*");
+      if (!error) {
+        santriList = data;
+        renderTable();
+      } else {
+        console.error("Gagal ambil data:", error);
+      }
     }
 
     function renderTable(filter = "") {
@@ -114,7 +120,7 @@
               <td>${s.hp}</td>
               <td>${s.status}</td>
               <td class="actions">
-                <button onclick="hapusSantri(${i})">Hapus</button>
+                <button onclick="hapusSantri(${s.id})">Hapus</button>
               </td>
             </tr>
           `;
@@ -123,42 +129,28 @@
       });
     }
 
-    async function hapusSantri(index) {
-      santriList.splice(index, 1);
-      renderTable(searchInput.value);
+    async function hapusSantri(id) {
+      await supabase.from("santri").delete().eq("id", id);
+      fetchSantri();
     }
 
     form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const santri = {
-    nama: document.getElementById("nama").value,
-    asal: document.getElementById("asal").value,
-    alamat: document.getElementById("alamat").value,
-    hp: document.getElementById("hp").value,
-    status: document.getElementById("status").value
-  };
-
-  try {
-    const response = await fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify(santri),
-      headers: { "Content-Type": "application/json" }
+      e.preventDefault();
+      const santri = {
+        nama: document.getElementById("nama").value,
+        asal: document.getElementById("asal").value,
+        alamat: document.getElementById("alamat").value,
+        hp: document.getElementById("hp").value,
+        status: document.getElementById("status").value
+      };
+      const { error } = await supabase.from("santri").insert([santri]);
+      if (error) {
+        console.error("Gagal tambah santri:", error);
+      } else {
+        form.reset();
+        fetchSantri();
+      }
     });
-
-    const result = await response.text();
-    console.log("Respon dari server:", result);
-
-    form.reset();
-
-    // Tambahkan jeda sebelum ambil data baru (biar Google Sheet sempat menyimpan)
-    setTimeout(fetchSantri, 1000); // 1 detik
-  } catch (error) {
-    console.error("Gagal kirim:", error);
-    alert("Gagal menambahkan santri. Coba lagi.");
-  }
-});
-
 
     searchInput.addEventListener("input", () => {
       renderTable(searchInput.value);
