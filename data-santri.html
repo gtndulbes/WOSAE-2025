@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data Santri</title>
   <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <nav class="topbar">
@@ -89,9 +88,14 @@
     const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
     localStorage.setItem('theme', newTheme);
   }
-   const SUPABASE_URL = "https://gmbwlgvobwclmqrqxqvd.supabase.co"; // Ganti dengan project Supabase kamu
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYndsZ3ZvYndjbG1xcnF4cXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjEwMzcsImV4cCI6MjA2OTk5NzAzN30.iXzfMXcIcyokTKbzrTpxvdfoQ7UCzoYqJ2HzxN_x6Ck"; // Ganti dengan anon key dari Supabase
-    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+   
+  </script>
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://gmbwlgvobwclmqrqxqvd.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYndsZ3ZvYndjbG1xcnF4cXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjEwMzcsImV4cCI6MjA2OTk5NzAzN30.iXzfMXcIcyokTKbzrTpxvdfoQ7UCzoYqJ2HzxN_x6Ck";
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const form = document.getElementById("formSantri");
     const tabelSantri = document.getElementById("tabelSantri");
