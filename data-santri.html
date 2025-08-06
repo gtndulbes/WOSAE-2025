@@ -69,7 +69,7 @@
   </main>
 
   <script>
-     function toggleNav() {
+    function toggleNav() {
     document.getElementById('topbarLinks').classList.toggle('show');
   }
 
@@ -88,13 +88,18 @@
     const newTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
     localStorage.setItem('theme', newTheme);
   }
-   
+  function logout() {
+    localStorage.removeItem("savedUsername");
+    localStorage.removeItem("remember");
+    window.location.href = "login.html"; // Redirect ke halaman login
+  }
+
   </script>
   <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-  const supabaseUrl = 'https://gmbwlgvobwclmqrqxqvd.supabase.co'; // GANTI DENGAN URL SUPABASE KAMU
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYndsZ3ZvYndjbG1xcnF4cXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjEwMzcsImV4cCI6MjA2OTk5NzAzN30.iXzfMXcIcyokTKbzrTpxvdfoQ7UCzoYqJ2HzxN_x6Ck'; // GANTI DENGAN ANON KEY KAMU
+  const supabaseUrl = 'https://gmbwlgvobwclmqrqxqvd.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYndsZ3ZvYndjbG1xcnF4cXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjEwMzcsImV4cCI6MjA2OTk5NzAzN30.iXzfMXcIcyokTKbzrTpxvdfoQ7UCzoYqJ2HzxN_x6Ck';
   const supabaseClient = createClient(supabaseUrl, supabaseKey);
 
   const form = document.getElementById("formSantri");
@@ -110,7 +115,7 @@
       console.error("Gagal ambil data:", error);
       return;
     }
-
+    console.log("DATA DARI SUPABASE:", data);
     santriList = data;
     renderTable(filter);
   }
@@ -118,21 +123,35 @@
   function renderTable(filter = "") {
     tabelSantri.innerHTML = "";
     santriList.forEach((s) => {
-      if (s.nama.toLowerCase().includes(filter.toLowerCase())) {
-        const row = `
-          <tr>
-            <td>${s.nama}</td>
-            <td>${s.asal}</td>
-            <td>${s.alamat}</td>
-            <td>${s.hp}</td>
-            <td>${s.status}</td>
-            <td class="actions">
-              <button onclick="hapusSantri(${s.id})">Hapus</button>
-            </td>
-          </tr>
+      const nama = s.nama || "";
+      const asal = s.asal || "";
+      const alamat = s.alamat || "";
+      const hp = s.hp || "";
+      const status = s.status || "";
+
+      if (nama.toLowerCase().includes(filter.toLowerCase())) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${nama}</td>
+          <td>${asal}</td>
+          <td>${alamat}</td>
+          <td>${hp}</td>
+          <td>${status}</td>
+          <td class="actions">
+            <button data-id="${s.id}" class="hapus-btn">Hapus</button>
+          </td>
         `;
-        tabelSantri.innerHTML += row;
+        tabelSantri.appendChild(row);
       }
+    });
+
+    // Bind hapus
+    document.querySelectorAll('.hapus-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        const id = e.target.getAttribute('data-id');
+        await supabaseClient.from("santri").delete().eq("id", id);
+        fetchSantri();
+      });
     });
   }
 
@@ -151,7 +170,7 @@
       console.error("Gagal tambah santri:", error);
     } else {
       form.reset();
-      fetchSantri();
+      await fetchSantri();
     }
   });
 
@@ -164,11 +183,17 @@
       alert("Data masih kosong atau belum dimuat.");
       return;
     }
-
+    console.log("DATA UNTUK EKSPOR:", santriList);
     const { utils, writeFileXLSX } = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
 
     const headers = ["Nama", "Asal Sekolah", "Alamat", "No HP", "Status"];
-    const data = santriList.map(s => [s.nama, s.asal, s.alamat, s.hp, s.status]);
+    const data = santriList.map(s => [
+      s.nama || "",
+      s.asal || "",
+      s.alamat || "",
+      s.hp || "",
+      s.status || ""
+    ]);
     data.unshift(headers);
 
     const worksheet = utils.aoa_to_sheet(data);
