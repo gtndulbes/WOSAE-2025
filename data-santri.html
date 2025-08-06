@@ -5,6 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data Santri</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+  #tabelWrapper {
+    overflow-x: auto;
+    max-width: 100%;
+    border: 1px solid #ccc;
+    margin-top: 12px;
+  }
+
+  table {
+    border-collapse: collapse;
+    font-size: 13px;
+    width: 800px;
+  }
+
+  th, td {
+    border: 1px solid #ccc;
+    padding: 6px 8px;
+    text-align: left;
+    white-space: nowrap;
+  }
+</style>
 </head>
 <body>
   <nav class="topbar">
@@ -50,7 +71,7 @@
 
     <input type="text" id="searchInput" placeholder="Cari nama santri...">
     <button id="exportBtn">Ekspor ke Excel</button>
-
+    <div id="tabelWrapper">
     <table>
       <thead>
         <tr>
@@ -59,13 +80,13 @@
           <th>Alamat</th>
           <th>No HP</th>
           <th>Status</th>
-          <th>Aksi</th>
         </tr>
       </thead>
       <tbody id="tabelSantri">
         <!-- Data santri ditambahkan di sini -->
       </tbody>
     </table>
+    </div>
   </main>
 
   <script>
@@ -96,11 +117,11 @@
 
   </script>
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
   const supabaseUrl = 'https://gmbwlgvobwclmqrqxqvd.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdtYndsZ3ZvYndjbG1xcnF4cXZkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0MjEwMzcsImV4cCI6MjA2OTk5NzAzN30.iXzfMXcIcyokTKbzrTpxvdfoQ7UCzoYqJ2HzxN_x6Ck';
-  const supabaseClient = createClient(supabaseUrl, supabaseKey);
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   const form = document.getElementById("formSantri");
   const tabelSantri = document.getElementById("tabelSantri");
@@ -110,12 +131,11 @@
   let santriList = [];
 
   async function fetchSantri(filter = "") {
-    const { data, error } = await supabaseClient.from("santri").select("*");
+    const { data, error } = await supabase.from("santri").select("*");
     if (error) {
       console.error("Gagal ambil data:", error);
       return;
     }
-    console.log("DATA DARI SUPABASE:", data);
     santriList = data;
     renderTable(filter);
   }
@@ -123,38 +143,21 @@
   function renderTable(filter = "") {
     tabelSantri.innerHTML = "";
     if (!santriList.length) {
-      tabelSantri.innerHTML = `<tr><td colspan="6" style="text-align:center;">Belum ada data santri.</td></tr>`;
+      tabelSantri.innerHTML = `<tr><td colspan="5" style="text-align:center;">Belum ada data santri.</td></tr>`;
       return;
     }
-    santriList.forEach((s) => {
-      const nama = s.nama || "";
-      const asal = s.asal || "";
-      const alamat = s.alamat || "";
-      const hp = s.hp || "";
-      const status = s.status || "";
 
-      if (nama.toLowerCase().includes(filter.toLowerCase())) {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${nama}</td>
-          <td>${asal}</td>
-          <td>${alamat}</td>
-          <td>${hp}</td>
-          <td>${status}</td>
-          <td class="actions">
-            <button data-id="${s.id}" class="hapus-btn">Hapus</button>
-          </td>
-        `;
-        tabelSantri.appendChild(row);
-      }
-    });
-
-    document.querySelectorAll('.hapus-btn').forEach(btn => {
-      btn.addEventListener('click', async (e) => {
-        const id = e.target.getAttribute('data-id');
-        await supabaseClient.from("santri").delete().eq("id", id);
-        fetchSantri();
-      });
+    const filtered = santriList.filter(s => s.nama?.toLowerCase().includes(filter.toLowerCase()));
+    filtered.forEach((s) => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td style="font-size: 13px; padding: 6px 8px;">${s.nama || ""}</td>
+        <td style="font-size: 13px; padding: 6px 8px;">${s.asal || ""}</td>
+        <td style="font-size: 13px; padding: 6px 8px;">${s.alamat || ""}</td>
+        <td style="font-size: 13px; padding: 6px 8px;">${s.hp || ""}</td>
+        <td style="font-size: 13px; padding: 6px 8px;">${s.status || ""}</td>
+      `;
+      tabelSantri.appendChild(row);
     });
   }
 
@@ -168,7 +171,7 @@
       status: document.getElementById("status").value
     };
 
-    const { error } = await supabaseClient.from("santri").insert([santri]);
+    const { error } = await supabase.from("santri").insert([santri]);
     if (error) {
       console.error("Gagal tambah santri:", error);
     } else {
@@ -183,7 +186,6 @@
 
   exportBtn.addEventListener("click", async () => {
     const { utils, writeFileXLSX } = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs');
-
     if (!santriList.length) {
       alert("Data masih kosong atau belum dimuat.");
       return;
