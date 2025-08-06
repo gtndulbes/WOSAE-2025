@@ -1,15 +1,33 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Logout</title>
-  <meta http-equiv="refresh" content="1;url=login.html">
-  <script>
-    localStorage.removeItem('isLoggedIn');
-  </script>
+  
+  <!-- Jangan cache halaman ini -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 </head>
 <body>
   <p>Anda telah logout. Mengalihkan ke halaman login...</p>
+
+  <script>
+    // Hapus status login
+    localStorage.removeItem('isLoggedIn');
+
+    // Cegah tombol back
+    history.pushState(null, '', location.href);
+    window.addEventListener('popstate', function () {
+      history.pushState(null, '', location.href);
+    });
+
+    // Redirect setelah 1 detik
+    setTimeout(function () {
+      window.location.href = 'login.html';
+    }, 1000);
+  </script>
 </body>
 </html>
+
